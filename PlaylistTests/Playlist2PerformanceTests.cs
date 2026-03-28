@@ -1,0 +1,57 @@
+using System;
+using System.Diagnostics;
+using NUnit.Framework;
+
+[TestFixture]
+public class Playlist2PerformanceTests
+{
+    [Test]
+    public void Measure_LinkedList_Performance_Small_And_Large()
+    {
+        RunPerformanceTest(10);
+        RunPerformanceTest(10000);
+
+        Assert.Pass("Performance test completed. Check console output.");
+    }
+
+    private void RunPerformanceTest(int size)
+    {
+        IPlaylist playlist = new Playlist();
+        Stopwatch stopwatch = new Stopwatch();
+
+        stopwatch.Start();
+        for (int i = 0; i < size; i++)
+        {
+            playlist.AddSong(new Song
+            {
+                Title = $"Song {i}",
+                Artist = $"Artist {i}",
+                Length = 180
+            });
+        }
+        stopwatch.Stop();
+        long addTime = stopwatch.ElapsedMilliseconds;
+
+        Song middleSong = new Song
+        {
+            Title = $"Song {size / 2}",
+            Artist = $"Artist {size / 2}"
+        };
+
+        stopwatch.Restart();
+        playlist.MoveSongUp(middleSong);
+        stopwatch.Stop();
+        long moveTime = stopwatch.ElapsedMilliseconds;
+
+        stopwatch.Restart();
+        playlist.RemoveSong(middleSong);
+        stopwatch.Stop();
+        long removeTime = stopwatch.ElapsedMilliseconds;
+
+        Console.WriteLine($"Linked List Playlist size: {size}");
+        Console.WriteLine($"Add time: {addTime} ms");
+        Console.WriteLine($"Move time: {moveTime} ms");
+        Console.WriteLine($"Remove time: {removeTime} ms");
+        Console.WriteLine("-----------------------------------");
+    }
+}

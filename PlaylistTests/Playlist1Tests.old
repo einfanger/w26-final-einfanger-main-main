@@ -1,0 +1,157 @@
+using NUnit.Framework;
+
+[TestFixture]
+public class Playlist1Tests
+{
+    private IPlaylist _playlist;
+
+    [SetUp]
+    public void Setup()
+    {
+        _playlist = new Playlist();
+    }
+
+    [Test]
+    public void AddSong_AddsSongToPlaylist()
+    {
+        Song song = new Song { Title = "American Idiot", Artist = "Green Day", Length = 197 };
+
+        _playlist.AddSong(song);
+
+        Assert.That(_playlist.Length(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void RemoveSong_RemovesMatchingSong()
+    {
+        Song song = new Song { Title = "Holiday", Artist = "Green Day", Length = 232 };
+        _playlist.AddSong(song);
+
+        bool removed = _playlist.RemoveSong(new Song { Title = "Holiday", Artist = "Green Day" });
+
+        Assert.That(removed, Is.True);
+        Assert.That(_playlist.Length(), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void RemoveSong_ReturnsFalseWhenSongNotFound()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+
+        bool removed = _playlist.RemoveSong(new Song { Title = "Missing Song" });
+
+        Assert.That(removed, Is.False);
+        Assert.That(_playlist.Length(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void PlayNext_ReturnsSongsInOrder()
+    {
+        Song first = new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 };
+        Song second = new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 };
+
+        _playlist.AddSong(first);
+        _playlist.AddSong(second);
+
+        Song? next1 = _playlist.PlayNext();
+        Song? next2 = _playlist.PlayNext();
+
+        Assert.That(next1?.Title, Is.EqualTo("Song 1"));
+        Assert.That(next2?.Title, Is.EqualTo("Song 2"));
+    }
+
+    [Test]
+    public void PlayNext_ReturnsNullWhenPlaylistFinished()
+    {
+        _playlist.AddSong(new Song { Title = "Only Song", Artist = "Artist", Length = 100 });
+
+        _playlist.PlayNext();
+        Song? result = _playlist.PlayNext();
+
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void Reset_AllowsSongsToPlayAgainFromBeginning()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+        _playlist.AddSong(new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 });
+
+        _playlist.PlayNext();
+        _playlist.PlayNext();
+        _playlist.Reset();
+
+        Song? result = _playlist.PlayNext();
+
+        Assert.That(result?.Title, Is.EqualTo("Song 1"));
+    }
+
+    [Test]
+    public void MoveSongUp_MovesSongEarlierInPlaylist()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+        _playlist.AddSong(new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 });
+        _playlist.AddSong(new Song { Title = "Song 3", Artist = "Artist 3", Length = 140 });
+
+        bool moved = _playlist.MoveSongUp(new Song { Title = "Song 3", Artist = "Artist 3" });
+
+        Song? first = _playlist.PlayNext();
+        Song? second = _playlist.PlayNext();
+        Song? third = _playlist.PlayNext();
+
+        Assert.That(moved, Is.True);
+        Assert.That(first?.Title, Is.EqualTo("Song 1"));
+        Assert.That(second?.Title, Is.EqualTo("Song 3"));
+        Assert.That(third?.Title, Is.EqualTo("Song 2"));
+    }
+
+    [Test]
+    public void MoveSongUp_ReturnsFalseForFirstSong()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+        _playlist.AddSong(new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 });
+
+        bool moved = _playlist.MoveSongUp(new Song { Title = "Song 1", Artist = "Artist 1" });
+
+        Assert.That(moved, Is.False);
+    }
+
+    [Test]
+    public void MoveSongDown_MovesSongLaterInPlaylist()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+        _playlist.AddSong(new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 });
+        _playlist.AddSong(new Song { Title = "Song 3", Artist = "Artist 3", Length = 140 });
+
+        bool moved = _playlist.MoveSongDown(new Song { Title = "Song 1", Artist = "Artist 1" });
+
+        Song? first = _playlist.PlayNext();
+        Song? second = _playlist.PlayNext();
+        Song? third = _playlist.PlayNext();
+
+        Assert.That(moved, Is.True);
+        Assert.That(first?.Title, Is.EqualTo("Song 2"));
+        Assert.That(second?.Title, Is.EqualTo("Song 1"));
+        Assert.That(third?.Title, Is.EqualTo("Song 3"));
+    }
+
+    [Test]
+    public void MoveSongDown_ReturnsFalseForLastSong()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+        _playlist.AddSong(new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 });
+
+        bool moved = _playlist.MoveSongDown(new Song { Title = "Song 2", Artist = "Artist 2" });
+
+        Assert.That(moved, Is.False);
+    }
+
+    [Test]
+    public void Length_ReturnsCorrectNumberOfSongs()
+    {
+        _playlist.AddSong(new Song { Title = "Song 1", Artist = "Artist 1", Length = 100 });
+        _playlist.AddSong(new Song { Title = "Song 2", Artist = "Artist 2", Length = 120 });
+
+        Assert.That(_playlist.Length(), Is.EqualTo(2));
+    }
+}

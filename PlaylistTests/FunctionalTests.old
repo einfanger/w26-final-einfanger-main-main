@@ -1,0 +1,29 @@
+using NUnit.Framework;
+using System.Diagnostics;
+
+public class FunctionalTests
+{
+    [Test]
+    public void TestAddSongExample()
+    {
+        var playlist = new NoDataStructurePlaylist();
+        var song = new Song() { Artist = "Rick Astley", Length = 1.2, Title = "Never Gonna Give You Up" };
+        playlist.AddSong(song);
+        
+        Assert.That(playlist.Length, Is.EqualTo(1));
+    }
+    
+    [Test]
+    public void TestRemoveSongExample()
+    {
+        var playlist = new NoDataStructurePlaylist();
+        var song = new Song() { Artist = "Rick Astley", Length = 1.2, Title = "Never Gonna Give You Up" };
+        playlist.AddSong(song);
+        // Note that the Song object is different from the object that was added
+        Assert.That(playlist.RemoveSong(new Song() { Title = "Always Gonna Give You Up" }), Is.False);
+        
+        Assert.That(playlist.Length, Is.EqualTo(1));
+    }
+    
+    // TODO Add more tests for all the playlists...
+}
